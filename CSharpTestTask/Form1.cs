@@ -87,7 +87,7 @@ namespace CSharpTestTask
 
         private void timer1_Tick(object sender, EventArgs e)
         {
-            day_left_percentage = 1.0D - (TimeSpan.FromDays(1) + (DateTime.Today - DateTime.Now)).TotalDays;
+            day_left_percentage = 1.00D - (TimeSpan.FromDays(1) + (DateTime.Today - DateTime.Now)).TotalDays;
             this.Refresh();
         }
 
