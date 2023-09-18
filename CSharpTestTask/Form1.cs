@@ -71,6 +71,8 @@ namespace CSharpTestTask
         private void button1_MouseClick(object sender, MouseEventArgs e)
         {
             button1.BackgroundImage = Properties.Resources.Generate_Schedule;
+
+
         }
 
         private void button1_MouseLeave(object sender, EventArgs e)
