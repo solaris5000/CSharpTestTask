@@ -1,4 +1,6 @@
-﻿using System.Drawing;
+﻿using Bitlush;
+using System;
+using System.Drawing;
 using System.Threading.Tasks;
 
 namespace CSharpTestTask
@@ -15,6 +17,8 @@ namespace CSharpTestTask
         protected int tasks_pending;
         protected double day_left_percentage;
         int second_bar_y;
+
+        private Bitlush.AvlTree<Int32, Task> TasksTree = new AvlTree<int, Task>();
 
         /// <summary>
         /// Clean up any resources being used.

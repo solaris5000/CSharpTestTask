@@ -5,25 +5,37 @@ using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Security.Cryptography;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.Rebar;
 
 namespace CSharpTestTask
 {
+
     public partial class Form1 : Form
     {
 
         private void generate_tasks()
         {
-            var rand = new Random();
-            this.tasks_completed = rand.Next(0, 100);
-            this.tasks_pending = rand.Next(0, 100);
-            this.tasks_jeopardy = rand.Next(0, 100);
-
             labelCompleted.Text = "Completed " + this.tasks_completed.ToString();
             labeljeopardy.Text = "Pending " + this.tasks_pending.ToString();
             labelpending.Text = "Jeopardy " + this.tasks_jeopardy.ToString();
+
+            for (int i = 0; i < 3; i++)
+            {
+                Task temp = new Task();
+                TasksTree.Insert(temp.getId(), temp);
+            }
+
+            foreach (var task in this.TasksTree)
+            {
+                task.Value.consoleOutput();
+            }
+
+            Task drop = new Task();
+            drop.dropId();
         }
         public Form1()
         {

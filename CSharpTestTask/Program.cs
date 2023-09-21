@@ -6,6 +6,7 @@ using System.Windows.Forms;
 
 namespace CSharpTestTask
 {
+
     internal static class Program
     {
         /// <summary>
@@ -13,7 +14,7 @@ namespace CSharpTestTask
         /// </summary>
         [STAThread]
         static void Main()
-        {
+        { 
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Application.Run(new Form1());
