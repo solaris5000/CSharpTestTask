@@ -1,6 +1,8 @@
-﻿using System;
+﻿using Bitlush;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Media;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -23,6 +25,7 @@ namespace CSharpTestTask
         private bool enabled;
         private TaskStatus status;
         private Int32 id;
+        private int layer = random.Next(1, 20);
 
         public DateTime getStartTime() { return startTime; }
         public DateTime getEndTime() { return endTime; }
@@ -32,6 +35,8 @@ namespace CSharpTestTask
         public Int32 getId() { return id; } 
 
         public void dropId() { idCounter = 1; }
+
+        public int getLayer() { return layer; }
 
         public void consoleOutput()
         {
@@ -51,7 +56,7 @@ namespace CSharpTestTask
             enabled = random.Next(0, 1) == 1;
             id = idCounter++;
 
-            if (random.Next(0, 1) == 1)
+            if (random.Next(0, 2) == 1)
             {
                 status = TaskStatus.Completed;
             }
@@ -68,6 +73,21 @@ namespace CSharpTestTask
         ~Task()
         {
             Console.WriteLine("Dropping task");
+        }
+    }
+
+    class TaskTree
+    {
+        public AvlTree<Int32, Task> taskTree;
+
+        public TaskTree()
+        {
+
+        }
+
+        ~TaskTree()
+        {
+
         }
     }
 }
