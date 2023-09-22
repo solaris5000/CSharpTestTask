@@ -24,7 +24,7 @@ namespace CSharpTestTask
             this.tasks_pending = 0;
             this.tasks_jeopardy = 0;
 
-            for (int i = 0; i < 500; i++)
+            for (int i = 0; i < 5000; i++)
             {
                 Task temp = new Task();
 
@@ -133,6 +133,10 @@ namespace CSharpTestTask
 
         private void Form1_Resize(object sender, EventArgs e)
         {
+            tasksXBar.Location = new System.Drawing.Point(0, this.Height - 56);
+            tasksXBar.Width = this.Width - 35;
+            tasksYBar.Location = new System.Drawing.Point(this.Width - 35, tasksYBar.Location.Y);
+            tasksYBar.Height = this.Height - 156;
             this.button1.Location = new Point(this.Size.Width - 200, this.button1.Location.Y);
         }
 
@@ -143,22 +147,17 @@ namespace CSharpTestTask
 
         private void Form1_Load(object sender, EventArgs e)
         {
+            tasksXBar.Location = new System.Drawing.Point(0, this.Height - 56);
+            tasksXBar.Width = this.Width - 35;
+
+            tasksYBar.Location = new System.Drawing.Point(this.Width - 35, 100);
+            tasksYBar.Height = this.Height - 156;
             this.DoubleBuffered = true;
         }
 
         private void Form1_Paint(object sender, PaintEventArgs e)
         {
-            Pen blackPen = new Pen(Color.Black, 4);
-            Pen darkGrayPen = new Pen(Color.DarkGray, 4);
-            Pen grayPen = new Pen(Color.Gray, 4);
-
-            SolidBrush darkGrayBrush = new SolidBrush(Color.DarkGray);
-            SolidBrush grayBrush = new SolidBrush(Color.Gray);
-            SolidBrush lightGrayBrush = new SolidBrush(Color.LightGray);
-
-            SolidBrush greenBrush = new SolidBrush(Color.Green);
-            SolidBrush orangeBrush = new SolidBrush(Color.Orange);
-            SolidBrush redBrush = new SolidBrush(Color.Red);
+            
 
             System.Drawing.Font drawFont = new System.Drawing.Font("Arial", 16);
             System.Drawing.SolidBrush drawBrush = new System.Drawing.SolidBrush(System.Drawing.Color.Black);
@@ -172,9 +171,17 @@ namespace CSharpTestTask
             e.Graphics.FillRectangle(lightGrayBrush, midBar);
             e.Graphics.FillRectangle(grayBrush, botBar);
 
+            var current_hour_view = DateTime.Today.AddHours(tasksXBar.Value);
+
             //  Рисуем сами таски
             foreach (var task in this.TasksTree)
             {
+                // Пропускаем рендер таски, если данный ресурс не в нужно время
+                if (task.Value.getEndTime() < current_hour_view || task.Value.getStartTime() > current_hour_view)
+                {
+                    continue;
+                }
+
                 var start_percent = (task.Value.getStartTime() - DateTime.Today).TotalDays;
                 var end_percent = (task.Value.getEndTime() - DateTime.Today).TotalDays;
                 var rand = new Random();
@@ -182,35 +189,50 @@ namespace CSharpTestTask
                 //Console.WriteLine("Id " + task.Value.getId() + " start :  " + start_percent + " end " + end_percent);
 
                 var x_x = this.Size.Width;
-                var rect = new Rectangle((int)(this.Size.Width * start_percent), 200 + task.Value.getLayer() * 25, (int)(this.Size.Width * (end_percent - start_percent)), (int)(25 * drawscale));
+                //var rect = new Rectangle((int)(this.Size.Width * start_percent) - (this.Width / x_scale) * (x_scale - tasksXBar.Value), 200 + task.Value.getLayer() * 25, (int)(this.Size.Width * (end_percent - start_percent)), (int)(25 * drawscale));
+                var rect = new Rectangle(
+                /*x*/    (int)(this.Size.Width * start_percent) - (this.Size.Width / x_scale) * tasksXBar.Value + 50, 
+                /*y*/    100 + task.Value.getLayer() * 25, 
+                /*w*/    (int)(this.Size.Width * (end_percent - start_percent) * x_scale), 
+                /*h*/    (int)(25 * drawscale));
 
 
 
 
-                if (task.Value.getStatus() == TaskStatus.Completed)
+                if (task.Value.isEnabled()) {
+                    if (task.Value.getStatus() == TaskStatus.Completed)
+                    {
+                        e.Graphics.FillRectangle(greenBrush, rect);
+                    }
+                    else if (task.Value.getStatus() == TaskStatus.Pending)
+                    {
+                        e.Graphics.FillRectangle(orangeBrush, rect);
+                    }
+                    else
+                    {
+                        e.Graphics.FillRectangle(redBrush, rect);
+                    }
+                } else
                 {
-                    e.Graphics.FillRectangle(greenBrush, rect);
+                    e.Graphics.FillRectangle(opacityBrush, rect);
                 }
-                else if (task.Value.getStatus() == TaskStatus.Pending)
+
+                if (rect.X > 0)
                 {
-                    e.Graphics.FillRectangle(orangeBrush, rect);
+                    e.Graphics.DrawString(task.Value.getStartTime().TimeOfDay.ToString() + " | " + task.Value.getEndTime().TimeOfDay.ToString(), drawFont, drawBrush, rect.X, rect.Y, drawFormat);
                 }
                 else
                 {
-                    e.Graphics.FillRectangle(redBrush, rect);
+                    e.Graphics.DrawString(task.Value.getStartTime().TimeOfDay.ToString() + " | " + task.Value.getEndTime().TimeOfDay.ToString(), drawFont, drawBrush, 50, rect.Y, drawFormat);
                 }
-
-                e.Graphics.DrawString(task.Value.getId().ToString(), drawFont, drawBrush, rect.X, rect.Y, drawFormat);
             }
 
 
 
             // Рисуем линию прогресса дня
-            int x = (int)(this.Size.Width * this.day_left_percentage);
+            int x = (int)(this.Size.Width * this.day_left_percentage) - (this.Width / x_scale) * tasksXBar.Value;
             int X1 = x, Y1 = 0, X2 = x, Y2 = this.Size.Height;
             e.Graphics.DrawLine(blackPen, X1, Y1, X2, Y2);
-
-            blackPen.Dispose();
         }
 
         private void Form1_Scroll(object sender, ScrollEventArgs e)
@@ -230,6 +252,43 @@ namespace CSharpTestTask
         private void hScrollBar1_Scroll(object sender, ScrollEventArgs e)
         {
             this.drawscale = hScrollBar1.Value / 100.0;
+        }
+
+        private void vScrollBar1_Scroll(object sender, ScrollEventArgs e)
+        {
+
+        }
+
+        private void tasksXBar_Scroll(object sender, ScrollEventArgs e)
+        {
+            x_task_dispose = tasksXBar.Value;
+
+            label1.Text = "View from " + (tasksXBar.Value - 1).ToString() + " to " + tasksXBar.Value.ToString() + " hrs ";
+        }
+
+        private void Form1_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            if (e.KeyChar == '+')
+            {
+                if (x_scale < 100)
+                {
+                    x_scale++;
+                }
+            }
+
+            if (e.KeyChar == '-')
+            {
+                if (x_scale > 1)
+                {
+                    x_scale--;
+                }
+                
+            }
+
+                tasksXBar.Maximum = x_scale - 1;
+
+            tasksXBar.Invalidate();
+            Console.WriteLine(e.KeyChar.ToString() + " " + x_scale + " " + tasksXBar.Maximum);
         }
     }
 }

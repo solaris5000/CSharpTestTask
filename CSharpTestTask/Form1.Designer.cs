@@ -24,6 +24,25 @@ namespace CSharpTestTask
 
         private Bitlush.AvlTree<Int32, Task> TasksTree = new AvlTree<int, Task>();
 
+
+        int x_task_dispose = 0;
+        int y_task_dispose = 0;
+        int x_scale = 24;
+
+        Pen blackPen = new Pen(Color.Black, 4);
+        Pen darkGrayPen = new Pen(Color.DarkGray, 4);
+        Pen grayPen = new Pen(Color.Gray, 4);
+
+        SolidBrush darkGrayBrush = new SolidBrush(Color.DarkGray);
+        SolidBrush grayBrush = new SolidBrush(Color.Gray);
+        SolidBrush lightGrayBrush = new SolidBrush(Color.LightGray);
+
+        SolidBrush greenBrush = new SolidBrush(Color.Green);
+        SolidBrush orangeBrush = new SolidBrush(Color.Orange);
+        SolidBrush redBrush = new SolidBrush(Color.Red);
+        SolidBrush opacityBrush = new SolidBrush(Color.FromArgb(100, 170, 170, 170));
+
+
         /// <summary>
         /// Clean up any resources being used.
         /// </summary>
@@ -55,6 +74,9 @@ namespace CSharpTestTask
             this.JeopardyIcon = new System.Windows.Forms.Panel();
             this.timer1 = new System.Windows.Forms.Timer(this.components);
             this.hScrollBar1 = new System.Windows.Forms.HScrollBar();
+            this.tasksXBar = new System.Windows.Forms.HScrollBar();
+            this.tasksYBar = new System.Windows.Forms.VScrollBar();
+            this.label1 = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // button1
@@ -148,11 +170,42 @@ namespace CSharpTestTask
             this.hScrollBar1.Value = 1;
             this.hScrollBar1.Scroll += new System.Windows.Forms.ScrollEventHandler(this.hScrollBar1_Scroll);
             // 
+            // tasksXBar
+            // 
+            this.tasksXBar.LargeChange = 1;
+            this.tasksXBar.Location = new System.Drawing.Point(0, 430);
+            this.tasksXBar.Maximum = 23;
+            this.tasksXBar.Name = "tasksXBar";
+            this.tasksXBar.Size = new System.Drawing.Size(772, 20);
+            this.tasksXBar.TabIndex = 9;
+            this.tasksXBar.Value = 1;
+            this.tasksXBar.Scroll += new System.Windows.Forms.ScrollEventHandler(this.tasksXBar_Scroll);
+            // 
+            // tasksYBar
+            // 
+            this.tasksYBar.Location = new System.Drawing.Point(762, 95);
+            this.tasksYBar.Name = "tasksYBar";
+            this.tasksYBar.Size = new System.Drawing.Size(20, 333);
+            this.tasksYBar.TabIndex = 10;
+            this.tasksYBar.Scroll += new System.Windows.Forms.ScrollEventHandler(this.vScrollBar1_Scroll);
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(394, 43);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(35, 13);
+            this.label1.TabIndex = 11;
+            this.label1.Text = "label1";
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(800, 450);
+            this.ClientSize = new System.Drawing.Size(784, 451);
+            this.Controls.Add(this.label1);
+            this.Controls.Add(this.tasksYBar);
+            this.Controls.Add(this.tasksXBar);
             this.Controls.Add(this.hScrollBar1);
             this.Controls.Add(this.labelpending);
             this.Controls.Add(this.CompletedIcon);
@@ -161,11 +214,13 @@ namespace CSharpTestTask
             this.Controls.Add(this.labelCompleted);
             this.Controls.Add(this.JeopardyIcon);
             this.Controls.Add(this.PendingIcon);
+            this.KeyPreview = true;
             this.Name = "Form1";
             this.Text = "Form1";
             this.Load += new System.EventHandler(this.Form1_Load);
             this.Scroll += new System.Windows.Forms.ScrollEventHandler(this.Form1_Scroll);
             this.Paint += new System.Windows.Forms.PaintEventHandler(this.Form1_Paint);
+            this.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.Form1_KeyPress);
             this.MouseDown += new System.Windows.Forms.MouseEventHandler(this.Form1_MouseDown);
             this.MouseUp += new System.Windows.Forms.MouseEventHandler(this.Form1_MouseUp);
             this.Resize += new System.EventHandler(this.Form1_Resize);
@@ -185,6 +240,9 @@ namespace CSharpTestTask
         private System.Windows.Forms.Label labelCompleted;
         private System.Windows.Forms.Timer timer1;
         private System.Windows.Forms.HScrollBar hScrollBar1;
+        private System.Windows.Forms.HScrollBar tasksXBar;
+        private System.Windows.Forms.VScrollBar tasksYBar;
+        private System.Windows.Forms.Label label1;
     }
 }
 

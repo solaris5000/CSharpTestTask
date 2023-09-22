@@ -25,7 +25,7 @@ namespace CSharpTestTask
         private bool enabled;
         private TaskStatus status;
         private Int32 id;
-        private int layer = random.Next(1, 20);
+        private int layer = random.Next(1, 40);
 
         public DateTime getStartTime() { return startTime; }
         public DateTime getEndTime() { return endTime; }
@@ -52,8 +52,8 @@ namespace CSharpTestTask
         public Task()
         {
             startTime = DateTime.Today.AddSeconds(random.Next(0, 86000));
-            endTime = startTime.AddSeconds(random.Next(100, (int)(DateTime.Today.AddDays(1) - startTime).TotalSeconds));
-            enabled = random.Next(0, 1) == 1;
+            endTime = startTime.AddSeconds(random.Next(100, (int)(DateTime.Today.AddDays(1) - startTime).TotalSeconds) / 5);
+            enabled = random.Next(0, 2) == 1;
             id = idCounter++;
 
             if (random.Next(0, 2) == 1)
