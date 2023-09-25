@@ -24,7 +24,7 @@ namespace CSharpTestTask
             this.tasks_pending = 0;
             this.tasks_jeopardy = 0;
 
-            for (int i = 0; i < 50; i++)
+            for (int i = 0; i < 1000; i++)
             {
                 Task temp = new Task();
 
@@ -133,6 +133,10 @@ namespace CSharpTestTask
 
         private void Form1_Resize(object sender, EventArgs e)
         {
+            topBar = new Rectangle(0, 0, this.Size.Width, 60);
+            midBar = new Rectangle(0, 60, this.Size.Width, 40);
+            botBar = new Rectangle(0, 100, this.Size.Width, this.Size.Height - 100);
+
             tasksXBar.Location = new System.Drawing.Point(0, this.Height - 56);
             tasksXBar.Width = this.Width - 35;
             tasksYBar.Location = new System.Drawing.Point(this.Width - 35, tasksYBar.Location.Y);
@@ -160,6 +164,9 @@ namespace CSharpTestTask
 
         private void Form1_Load(object sender, EventArgs e)
         {
+            topBar = new Rectangle(0, 0, this.Size.Width, 60);
+            midBar = new Rectangle(0, 60, this.Size.Width, 40);
+            botBar = new Rectangle(0, 100, this.Size.Width, this.Size.Height - 100);
 
             tasksYBar.Height = this.Height - 156;
             this.DoubleBuffered = true;
@@ -182,6 +189,19 @@ namespace CSharpTestTask
             }
             tasksXBar.Maximum = x_scale * 20;
             this.button1.Location = new Point(this.Size.Width - 200, this.button1.Location.Y);
+
+            var xbarmax = (int)(x_scale / 2) * 50;
+            if (xbarmax == 0)
+            {
+                tasksXBar.Maximum = 1;
+                tasksXBar.Value = 0;
+                tasksXBar.Enabled = false;
+            }
+            else
+            {
+                tasksXBar.Maximum = xbarmax;
+                tasksXBar.Enabled = true;
+            }
         }
 
         private void Form1_Paint(object sender, PaintEventArgs e)
@@ -198,7 +218,6 @@ namespace CSharpTestTask
 
 
             // Рисуем поле для тасков
-            var botBar = new Rectangle(0, 100, this.Size.Width, this.Size.Height - 100);
             e.Graphics.FillRectangle(grayBrush, botBar);
 
             //  Рисуем сами таски
@@ -218,25 +237,23 @@ namespace CSharpTestTask
 
                 var x_x = this.Size.Width;
                 //var rect = new Rectangle((int)(this.Size.Width * start_percent) - (this.Width / x_scale) * (x_scale - tasksXBar.Value), 200 + task.Value.getLayer() * 25, (int)(this.Size.Width * (end_percent - start_percent)), (int)(25 * drawscale));
-                var rect = new Rectangle(
-                // X - почему-то не рисуется туда, куда надо, надо понять почему X не рисуется там где надо
-
-                //!ПЕРЕРАБОТАТЬ ТУТ, ПОЧЕМУ-ТО ПОЗИЦИЯ НЕ ПОЛУЧАЕТСЯ
-                /*x*/    (int)(this.Width * start_percent * x_scale) - ((this.Width / tasksXBar.Maximum) * tasksXBar.Value) * x_scale,
+                taskRectangle.Location = new Point(
+                /*x*/(int)(this.Width * start_percent * x_scale) - ((this.Width / tasksXBar.Maximum) * tasksXBar.Value) * x_scale,
                 //(int)(this.Size.Width * start_percent) - (this.Size.Width / x_scale) * tasksXBar.Value + 50,
-                /*y*/    100 - 25 + task.Value.getLayer() * 25 - tasksYBar.Value,
-                /*w*/    (int)(this.Size.Width * (end_percent - start_percent) * x_scale),
-                /*h*/    (int)(25 * drawscale)); ;
+                /*y*/    100 - 25 + task.Value.getLayer() * 25 - tasksYBar.Value);
+
+                taskRectangle.Width = (int)(this.Size.Width * (end_percent - start_percent) * x_scale);
+                taskRectangle.Height = (int)(25 * drawscale);
 
                 if (!(
-                    (rect.Location.X >= 0 && rect.Location.X < this.Width) || 
-                    (rect.Location.X + rect.Width >= 0)))
+                    (taskRectangle.Location.X >= 0 && taskRectangle.Location.X < this.Width) || 
+                    (taskRectangle.Location.X + taskRectangle.Width >= 0)))
                 {
                     continue;
                 }
 
 
-                if (rect.Location.Y < 100 - 25)
+                if (taskRectangle.Location.Y < 100 - 25)
                 {
                     continue;
                 }
@@ -244,50 +261,47 @@ namespace CSharpTestTask
                 if (task.Value.isEnabled()) {
                     if (task.Value.getStatus() == TaskStatus.Completed)
                     {
-                        e.Graphics.FillRectangle(greenBrush, rect);
+                        e.Graphics.FillRectangle(completedBrush, taskRectangle);
                     }
                     else if (task.Value.getStatus() == TaskStatus.Pending)
                     {
-                        e.Graphics.FillRectangle(orangeBrush, rect);
+                        e.Graphics.FillRectangle(orangeBrush, taskRectangle);
                     }
                     else
                     {
-                        e.Graphics.FillRectangle(redBrush, rect);
+                        e.Graphics.FillRectangle(redBrush, taskRectangle);
                     }
                 } else
                 {
-                    e.Graphics.FillRectangle(opacityBrush, rect);
+                    e.Graphics.FillRectangle(opacityBrush, taskRectangle);
                 }
 
-                if (rect.X > 0)
+                if (taskRectangle.X > 0)
                 {
                     e.Graphics.DrawString(
                         task.Value.getStartTime().TimeOfDay.ToString() + " | " + task.Value.getEndTime().TimeOfDay.ToString() +  
-                        " X = " + rect.X.ToString() + "| X + W = "+ (rect.X + rect.Width).ToString(),
-                        drawFont, drawBrush, rect.X, rect.Y, drawFormat);
+                        " X = " + taskRectangle.X.ToString() + "| X + W = "+ (taskRectangle.X + taskRectangle.Width).ToString(),
+                        drawFont, drawBrush, taskRectangle.X, taskRectangle.Y, drawFormat);
                 }
                 else
                 {
                     e.Graphics.DrawString(
                         task.Value.getStartTime().TimeOfDay.ToString() + " | " + task.Value.getEndTime().TimeOfDay.ToString() + 
-                        " X = " + rect.X.ToString() + "| X + W = " + (rect.X + rect.Width).ToString(),
-                        drawFont, drawBrush, 50, rect.Y, drawFormat);
+                        " X = " + taskRectangle.X.ToString() + "| X + W = " + (taskRectangle.X + taskRectangle.Width).ToString(),
+                        drawFont, drawBrush, 50, taskRectangle.Y, drawFormat);
                 }
             }
 
             // Рисуем красиввенькие разделения экрана
-            var topBar = new Rectangle(0, 0, this.Size.Width, 60);
-            e.Graphics.FillRectangle(darkGrayBrush, topBar);
-
-            var midBar = new Rectangle(0, 60, this.Size.Width, 40);
+            e.Graphics.FillRectangle(darkGrayBrush, topBar); 
             e.Graphics.FillRectangle(lightGrayBrush, midBar);
 
             // Рисуем временну. разметку наверху.
             var tl_j = 0;
             var tl_x = 0;
-            for (int i = 0; i < 25; i++)
+            for (int i = 0; i < 24; i++)
             {
-                tl_x = (2 + (this.Width / 24) * i * x_scale) - ((this.Width / tasksXBar.Maximum) * tasksXBar.Value) * x_scale;
+                tl_x = (int)( (this.Width / 24.0D) * i * x_scale) - ((this.Width / tasksXBar.Maximum) * tasksXBar.Value) * x_scale;
                 e.Graphics.DrawLine(blackPen, 
                     tl_x, 
                     0,
@@ -297,7 +311,7 @@ namespace CSharpTestTask
                         i.ToString(),
                         drawFont, drawBrush, tl_x + 5, 15, drawFormat);
 
-                tl_j = (((2 + (this.Width / 24) * (i + 1) * x_scale) - ((this.Width / tasksXBar.Maximum) * tasksXBar.Value) * x_scale) - tl_x) / 2;
+                tl_j = (int)((((this.Width / 24.0D) * (i + 1) * x_scale) - ((this.Width / tasksXBar.Maximum) * tasksXBar.Value) * x_scale) - tl_x) / 2;
                 // Каждые 30 минут
                 e.Graphics.DrawLine(blackPen,
                         tl_j + tl_x,
@@ -362,11 +376,13 @@ namespace CSharpTestTask
 
         private void Form1_KeyPress(object sender, KeyPressEventArgs e)
         {
+            bool doubled = false; 
             if (e.KeyChar == '+')
             {
                 if (x_scale < 32)
                 {
                     x_scale*=2;
+                    doubled = true;
                 }
             }
 
@@ -389,6 +405,13 @@ namespace CSharpTestTask
             {
                 tasksXBar.Maximum = xbarmax;
                 tasksXBar.Enabled = true;
+                if (doubled)
+                {
+                    tasksXBar.Value *= 2;
+                } else
+                {
+                    tasksXBar.Value /= 2;
+                }
             }
                 
 

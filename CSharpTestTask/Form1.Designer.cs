@@ -37,10 +37,17 @@ namespace CSharpTestTask
         SolidBrush grayBrush = new SolidBrush(Color.Gray);
         SolidBrush lightGrayBrush = new SolidBrush(Color.LightGray);
 
+        TextureBrush completedBrush = new TextureBrush(Properties.Resources.Completed);
         SolidBrush greenBrush = new SolidBrush(Color.Green);
         SolidBrush orangeBrush = new SolidBrush(Color.Orange);
         SolidBrush redBrush = new SolidBrush(Color.Red);
         SolidBrush opacityBrush = new SolidBrush(Color.FromArgb(100, 170, 170, 170));
+
+        Rectangle taskRectangle = new Rectangle(0, 0, 0, 0);
+
+        Rectangle topBar = new Rectangle(0, 0, 0, 0);
+        Rectangle midBar = new Rectangle(0, 0, 0, 0);
+        Rectangle botBar = new Rectangle(0, 0, 0, 0);
 
 
         /// <summary>
