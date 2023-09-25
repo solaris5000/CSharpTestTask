@@ -194,7 +194,7 @@ namespace CSharpTestTask
 
            
 
-            var current_hour_view = DateTime.Today.AddHours(((double)tasksXBar.Value / (double)tasksXBar.Maximum) * 24.0D);
+            var current_hour_view = DateTime.Today.AddHours(((double)(tasksXBar.Value-1) / (double)tasksXBar.Maximum) * 24.0D);
 
 
             // Рисуем поле для тасков
@@ -205,10 +205,10 @@ namespace CSharpTestTask
             foreach (var task in this.TasksTree)
             {
                 // Пропускаем рендер таски, если данный ресурс не в нужно время
-                if (task.Value.getEndTime() < current_hour_view || task.Value.getStartTime() > current_hour_view && x_scale != 1)
+                /*if (task.Value.getEndTime() < current_hour_view || task.Value.getStartTime() > current_hour_view)
                 {
                     continue;
-                }
+                }*/
 
                 var start_percent = (task.Value.getStartTime() - DateTime.Today).TotalDays;
                 var end_percent = (task.Value.getEndTime() - DateTime.Today).TotalDays;
@@ -224,6 +224,13 @@ namespace CSharpTestTask
                 /*y*/    100 - 25 + task.Value.getLayer() * 25 - tasksYBar.Value,
                 /*w*/    (int)(this.Size.Width * (end_percent - start_percent) * x_scale),
                 /*h*/    (int)(25 * drawscale)); ;
+
+                if (!(
+                    (rect.Location.X >= 0 && rect.Location.X < this.Width) || 
+                    (rect.Location.X + rect.Width >= 0)))
+                {
+                    continue;
+                }
 
 
                 if (rect.Location.Y < 100 - 25)
@@ -251,11 +258,17 @@ namespace CSharpTestTask
 
                 if (rect.X > 0)
                 {
-                    e.Graphics.DrawString(task.Value.getStartTime().TimeOfDay.ToString() + " | " + task.Value.getEndTime().TimeOfDay.ToString(), drawFont, drawBrush, rect.X, rect.Y, drawFormat);
+                    e.Graphics.DrawString(
+                        //task.Value.getStartTime().TimeOfDay.ToString() + " | " + task.Value.getEndTime().TimeOfDay.ToString(), 
+                        "X = " + rect.X.ToString() + "| X + W = "+ (rect.X + rect.Width).ToString(),
+                        drawFont, drawBrush, rect.X, rect.Y, drawFormat);
                 }
                 else
                 {
-                    e.Graphics.DrawString(task.Value.getStartTime().TimeOfDay.ToString() + " | " + task.Value.getEndTime().TimeOfDay.ToString(), drawFont, drawBrush, 50, rect.Y, drawFormat);
+                    e.Graphics.DrawString(
+                        //task.Value.getStartTime().TimeOfDay.ToString() + " | " + task.Value.getEndTime().TimeOfDay.ToString(), 
+                        "X = " + rect.X.ToString() + "| X + W = " + (rect.X + rect.Width).ToString(),
+                        drawFont, drawBrush, 50, rect.Y, drawFormat);
                 }
             }
 
