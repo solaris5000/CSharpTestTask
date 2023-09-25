@@ -25,7 +25,7 @@ namespace CSharpTestTask
         private bool enabled;
         private TaskStatus status;
         private Int32 id;
-        private int layer = random.Next(1, 40);
+        private int layer = random.Next(1, 21);
 
         public DateTime getStartTime() { return startTime; }
         public DateTime getEndTime() { return endTime; }

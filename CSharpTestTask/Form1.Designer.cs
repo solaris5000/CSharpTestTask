@@ -27,7 +27,7 @@ namespace CSharpTestTask
 
         int x_task_dispose = 0;
         int y_task_dispose = 0;
-        int x_scale = 24;
+        int x_scale = 100;
 
         Pen blackPen = new Pen(Color.Black, 4);
         Pen darkGrayPen = new Pen(Color.DarkGray, 4);
@@ -174,7 +174,8 @@ namespace CSharpTestTask
             // 
             this.tasksXBar.LargeChange = 1;
             this.tasksXBar.Location = new System.Drawing.Point(0, 430);
-            this.tasksXBar.Maximum = 23;
+            this.tasksXBar.Maximum = 999;
+            this.tasksXBar.Minimum = 1;
             this.tasksXBar.Name = "tasksXBar";
             this.tasksXBar.Size = new System.Drawing.Size(772, 20);
             this.tasksXBar.TabIndex = 9;
@@ -184,6 +185,7 @@ namespace CSharpTestTask
             // tasksYBar
             // 
             this.tasksYBar.Location = new System.Drawing.Point(762, 95);
+            this.tasksYBar.Maximum = 5000;
             this.tasksYBar.Name = "tasksYBar";
             this.tasksYBar.Size = new System.Drawing.Size(20, 333);
             this.tasksYBar.TabIndex = 10;

@@ -24,7 +24,7 @@ namespace CSharpTestTask
             this.tasks_pending = 0;
             this.tasks_jeopardy = 0;
 
-            for (int i = 0; i < 5000; i++)
+            for (int i = 0; i < 50; i++)
             {
                 Task temp = new Task();
 
@@ -137,6 +137,19 @@ namespace CSharpTestTask
             tasksXBar.Width = this.Width - 35;
             tasksYBar.Location = new System.Drawing.Point(this.Width - 35, tasksYBar.Location.Y);
             tasksYBar.Height = this.Height - 156;
+
+            var taskYBarHeight = (25 * 21) - (this.Height - 156);
+            if (taskYBarHeight <= 0)
+            {
+                tasksYBar.Visible = false;
+                tasksYBar.Value = 0;
+            }
+            else
+            {
+                tasksYBar.Visible = true;
+                tasksYBar.Maximum = taskYBarHeight + 25;
+            }
+            
             this.button1.Location = new Point(this.Size.Width - 200, this.button1.Location.Y);
         }
 
@@ -147,12 +160,28 @@ namespace CSharpTestTask
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            tasksXBar.Location = new System.Drawing.Point(0, this.Height - 56);
-            tasksXBar.Width = this.Width - 35;
 
-            tasksYBar.Location = new System.Drawing.Point(this.Width - 35, 100);
             tasksYBar.Height = this.Height - 156;
             this.DoubleBuffered = true;
+
+            tasksXBar.Location = new System.Drawing.Point(0, this.Height - 56);
+            tasksXBar.Width = this.Width - 35;
+            tasksYBar.Location = new System.Drawing.Point(this.Width - 35, 100);
+            tasksYBar.Height = this.Height - 156;
+
+            var taskYBarHeight = (25 * 21) - (this.Height - 156);
+            if (taskYBarHeight <= 0)
+            {
+                tasksYBar.Visible = false;
+                tasksYBar.Value = 0;
+            }
+            else
+            {
+                tasksYBar.Visible = true;
+                tasksYBar.Maximum = taskYBarHeight + 25;
+            }
+
+            this.button1.Location = new Point(this.Size.Width - 200, this.button1.Location.Y);
         }
 
         private void Form1_Paint(object sender, PaintEventArgs e)
@@ -163,21 +192,20 @@ namespace CSharpTestTask
             System.Drawing.SolidBrush drawBrush = new System.Drawing.SolidBrush(System.Drawing.Color.Black);
             System.Drawing.StringFormat drawFormat = new System.Drawing.StringFormat();
 
-            // Рисуем красиввенькие разделения экрана
-            var topBar = new Rectangle(0, 0, this.Size.Width, 60);
-            var midBar = new Rectangle(0, 60, this.Size.Width, 40);
-            var botBar = new Rectangle(0, 100, this.Size.Width, this.Size.Height - 100);
-            e.Graphics.FillRectangle(darkGrayBrush, topBar);
-            e.Graphics.FillRectangle(lightGrayBrush, midBar);
-            e.Graphics.FillRectangle(grayBrush, botBar);
+           
 
-            var current_hour_view = DateTime.Today.AddHours(tasksXBar.Value);
+            var current_hour_view = DateTime.Today.AddHours(((double)tasksXBar.Value / (double)tasksXBar.Maximum) * 24.0D);
+
+
+            // Рисуем поле для тасков
+            var botBar = new Rectangle(0, 100, this.Size.Width, this.Size.Height - 100);
+            e.Graphics.FillRectangle(grayBrush, botBar);
 
             //  Рисуем сами таски
             foreach (var task in this.TasksTree)
             {
                 // Пропускаем рендер таски, если данный ресурс не в нужно время
-                if (task.Value.getEndTime() < current_hour_view || task.Value.getStartTime() > current_hour_view)
+                if (task.Value.getEndTime() < current_hour_view || task.Value.getStartTime() > current_hour_view && x_scale != 1)
                 {
                     continue;
                 }
@@ -191,13 +219,17 @@ namespace CSharpTestTask
                 var x_x = this.Size.Width;
                 //var rect = new Rectangle((int)(this.Size.Width * start_percent) - (this.Width / x_scale) * (x_scale - tasksXBar.Value), 200 + task.Value.getLayer() * 25, (int)(this.Size.Width * (end_percent - start_percent)), (int)(25 * drawscale));
                 var rect = new Rectangle(
-                /*x*/    (int)(this.Size.Width * start_percent) - (this.Size.Width / x_scale) * tasksXBar.Value + 50, 
-                /*y*/    100 + task.Value.getLayer() * 25, 
-                /*w*/    (int)(this.Size.Width * (end_percent - start_percent) * x_scale), 
-                /*h*/    (int)(25 * drawscale));
+                /*x*/    (int)(this.Width * start_percent * x_scale) - ((this.Width / tasksXBar.Maximum) * tasksXBar.Value) * x_scale,
+                //(int)(this.Size.Width * start_percent) - (this.Size.Width / x_scale) * tasksXBar.Value + 50,
+                /*y*/    100 - 25 + task.Value.getLayer() * 25 - tasksYBar.Value,
+                /*w*/    (int)(this.Size.Width * (end_percent - start_percent) * x_scale),
+                /*h*/    (int)(25 * drawscale)); ;
 
 
-
+                if (rect.Location.Y < 100 - 25)
+                {
+                    continue;
+                }
 
                 if (task.Value.isEnabled()) {
                     if (task.Value.getStatus() == TaskStatus.Completed)
@@ -227,10 +259,19 @@ namespace CSharpTestTask
                 }
             }
 
+            // Рисуем красиввенькие разделения экрана
+            var topBar = new Rectangle(0, 0, this.Size.Width, 60);
+            e.Graphics.FillRectangle(darkGrayBrush, topBar);
 
+            // Рисуем временну. разметку наверху.
 
+            var midBar = new Rectangle(0, 60, this.Size.Width, 40);
+            e.Graphics.FillRectangle(lightGrayBrush, midBar);
+            
+            label1.Text = "View near " + current_hour_view + " hrs | x_scale = " + x_scale;
             // Рисуем линию прогресса дня
-            int x = (int)(this.Size.Width * this.day_left_percentage) - (this.Width / x_scale) * tasksXBar.Value;
+            int x = (int)(this.Width * this.day_left_percentage * x_scale) - ((this.Width / tasksXBar.Maximum) * tasksXBar.Value) * x_scale;
+            //int x = (int)(this.Size.Width * this.day_left_percentage) - (this.Width / x_scale) * tasksXBar.Value;
             int X1 = x, Y1 = 0, X2 = x, Y2 = this.Size.Height;
             e.Graphics.DrawLine(blackPen, X1, Y1, X2, Y2);
         }
@@ -263,7 +304,7 @@ namespace CSharpTestTask
         {
             x_task_dispose = tasksXBar.Value;
 
-            label1.Text = "View from " + (tasksXBar.Value - 1).ToString() + " to " + tasksXBar.Value.ToString() + " hrs ";
+            
         }
 
         private void Form1_KeyPress(object sender, KeyPressEventArgs e)
@@ -285,7 +326,7 @@ namespace CSharpTestTask
                 
             }
 
-                tasksXBar.Maximum = x_scale - 1;
+                tasksXBar.Maximum = x_scale;
 
             tasksXBar.Invalidate();
             Console.WriteLine(e.KeyChar.ToString() + " " + x_scale + " " + tasksXBar.Maximum);
