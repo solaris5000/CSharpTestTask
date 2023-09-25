@@ -307,6 +307,7 @@ namespace CSharpTestTask
                
                 // Каждые 15-45 минут
 
+
                 e.Graphics.DrawLine(blackPen,
                         tl_x + tl_j / 2 ,
                         45,
