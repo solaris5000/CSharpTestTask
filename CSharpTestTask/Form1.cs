@@ -180,7 +180,7 @@ namespace CSharpTestTask
                 tasksYBar.Visible = true;
                 tasksYBar.Maximum = taskYBarHeight + 25;
             }
-
+            tasksXBar.Maximum = x_scale * 20;
             this.button1.Location = new Point(this.Size.Width - 200, this.button1.Location.Y);
         }
 
@@ -219,6 +219,9 @@ namespace CSharpTestTask
                 var x_x = this.Size.Width;
                 //var rect = new Rectangle((int)(this.Size.Width * start_percent) - (this.Width / x_scale) * (x_scale - tasksXBar.Value), 200 + task.Value.getLayer() * 25, (int)(this.Size.Width * (end_percent - start_percent)), (int)(25 * drawscale));
                 var rect = new Rectangle(
+                // X - почему-то не рисуется туда, куда надо, надо понять почему X не рисуется там где надо
+
+                //!ПЕРЕРАБОТАТЬ ТУТ, ПОЧЕМУ-ТО ПОЗИЦИЯ НЕ ПОЛУЧАЕТСЯ
                 /*x*/    (int)(this.Width * start_percent * x_scale) - ((this.Width / tasksXBar.Maximum) * tasksXBar.Value) * x_scale,
                 //(int)(this.Size.Width * start_percent) - (this.Size.Width / x_scale) * tasksXBar.Value + 50,
                 /*y*/    100 - 25 + task.Value.getLayer() * 25 - tasksYBar.Value,
@@ -259,15 +262,15 @@ namespace CSharpTestTask
                 if (rect.X > 0)
                 {
                     e.Graphics.DrawString(
-                        //task.Value.getStartTime().TimeOfDay.ToString() + " | " + task.Value.getEndTime().TimeOfDay.ToString(), 
-                        "X = " + rect.X.ToString() + "| X + W = "+ (rect.X + rect.Width).ToString(),
+                        task.Value.getStartTime().TimeOfDay.ToString() + " | " + task.Value.getEndTime().TimeOfDay.ToString() +  
+                        " X = " + rect.X.ToString() + "| X + W = "+ (rect.X + rect.Width).ToString(),
                         drawFont, drawBrush, rect.X, rect.Y, drawFormat);
                 }
                 else
                 {
                     e.Graphics.DrawString(
-                        //task.Value.getStartTime().TimeOfDay.ToString() + " | " + task.Value.getEndTime().TimeOfDay.ToString(), 
-                        "X = " + rect.X.ToString() + "| X + W = " + (rect.X + rect.Width).ToString(),
+                        task.Value.getStartTime().TimeOfDay.ToString() + " | " + task.Value.getEndTime().TimeOfDay.ToString() + 
+                        " X = " + rect.X.ToString() + "| X + W = " + (rect.X + rect.Width).ToString(),
                         drawFont, drawBrush, 50, rect.Y, drawFormat);
                 }
             }
@@ -276,11 +279,47 @@ namespace CSharpTestTask
             var topBar = new Rectangle(0, 0, this.Size.Width, 60);
             e.Graphics.FillRectangle(darkGrayBrush, topBar);
 
-            // Рисуем временну. разметку наверху.
-
             var midBar = new Rectangle(0, 60, this.Size.Width, 40);
             e.Graphics.FillRectangle(lightGrayBrush, midBar);
-            
+
+            // Рисуем временну. разметку наверху.
+            var tl_j = 0;
+            var tl_x = 0;
+            for (int i = 0; i < 25; i++)
+            {
+                tl_x = (2 + (this.Width / 24) * i * x_scale) - ((this.Width / tasksXBar.Maximum) * tasksXBar.Value) * x_scale;
+                e.Graphics.DrawLine(blackPen, 
+                    tl_x, 
+                    0,
+                    tl_x,
+                    60);
+                e.Graphics.DrawString(
+                        i.ToString(),
+                        drawFont, drawBrush, tl_x + 5, 15, drawFormat);
+
+                tl_j = (((2 + (this.Width / 24) * (i + 1) * x_scale) - ((this.Width / tasksXBar.Maximum) * tasksXBar.Value) * x_scale) - tl_x) / 2;
+                // Каждые 30 минут
+                e.Graphics.DrawLine(blackPen,
+                        tl_j + tl_x,
+                        30,
+                        tl_j + tl_x,
+                        60);
+               
+                // Каждые 15-45 минут
+
+                e.Graphics.DrawLine(blackPen,
+                        tl_x + tl_j / 2 ,
+                        45,
+                        tl_x + tl_j / 2,
+                        60);
+                // Каждые 15-45 минут
+                e.Graphics.DrawLine(blackPen,
+                        tl_x + tl_j / 2 + tl_j,
+                        45,
+                        tl_x + tl_j / 2 + tl_j,
+                        60);
+            }
+
             label1.Text = "View near " + current_hour_view + " hrs | x_scale = " + x_scale;
             // Рисуем линию прогресса дня
             int x = (int)(this.Width * this.day_left_percentage * x_scale) - ((this.Width / tasksXBar.Maximum) * tasksXBar.Value) * x_scale;
@@ -324,9 +363,9 @@ namespace CSharpTestTask
         {
             if (e.KeyChar == '+')
             {
-                if (x_scale < 100)
+                if (x_scale < 32)
                 {
-                    x_scale++;
+                    x_scale*=2;
                 }
             }
 
@@ -334,12 +373,23 @@ namespace CSharpTestTask
             {
                 if (x_scale > 1)
                 {
-                    x_scale--;
+                    x_scale/=2;
                 }
                 
             }
 
-                tasksXBar.Maximum = x_scale;
+            var xbarmax = (int)(x_scale / 2) * 50;
+            if (xbarmax == 0)
+            {
+                tasksXBar.Maximum = 1;
+                tasksXBar.Value = 0;
+                tasksXBar.Enabled = false; 
+            }else
+            {
+                tasksXBar.Maximum = xbarmax;
+                tasksXBar.Enabled = true;
+            }
+                
 
             tasksXBar.Invalidate();
             Console.WriteLine(e.KeyChar.ToString() + " " + x_scale + " " + tasksXBar.Maximum);
