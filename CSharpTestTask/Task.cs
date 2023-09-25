@@ -75,19 +75,4 @@ namespace CSharpTestTask
             Console.WriteLine("Dropping task");
         }
     }
-
-    class TaskTree
-    {
-        public AvlTree<Int32, Task> taskTree;
-
-        public TaskTree()
-        {
-
-        }
-
-        ~TaskTree()
-        {
-
-        }
-    }
 }

@@ -22,7 +22,7 @@ namespace CSharpTestTask
 
         double drawscale = 1.0D;
 
-        private Bitlush.AvlTree<Int32, Task> TasksTree = new AvlTree<int, Task>();
+        private Bitlush.AvlTree<DateTime, Task> TasksTree = new AvlTree<DateTime, Task>();
 
 
         int x_task_dispose = 0;
@@ -42,10 +42,10 @@ namespace CSharpTestTask
         SolidBrush lightGrayBrush = new SolidBrush(Color.LightGray);
 
         //TextureBrush completedBrush = new TextureBrush(Properties.Resources.Completed);
-        SolidBrush completedBrush = new SolidBrush(Color.Green);
-        SolidBrush orangeBrush = new SolidBrush(Color.Orange);
-        SolidBrush redBrush = new SolidBrush(Color.Red);
-        SolidBrush opacityBrush = new SolidBrush(Color.FromArgb(100, 170, 170, 170));
+        SolidBrush completedBrush = new SolidBrush(Color.FromArgb(170, 50, 255, 50));
+        SolidBrush orangeBrush = new SolidBrush(Color.FromArgb(170, 220, 150, 50));
+        SolidBrush redBrush = new SolidBrush(Color.FromArgb(170, 255, 50, 50));
+        SolidBrush opacityBrush = new SolidBrush(Color.FromArgb(80, 170, 170, 170));
 
         Rectangle taskRectangle = new Rectangle(0, 0, 0, 0);
 
@@ -87,6 +87,7 @@ namespace CSharpTestTask
             this.tasksXBar = new System.Windows.Forms.HScrollBar();
             this.tasksYBar = new System.Windows.Forms.VScrollBar();
             this.label1 = new System.Windows.Forms.Label();
+            this.label2 = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // button1
@@ -200,11 +201,21 @@ namespace CSharpTestTask
             this.label1.Text = "label1";
             this.label1.Visible = false;
             // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(285, 54);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(35, 13);
+            this.label2.TabIndex = 12;
+            this.label2.Text = "label2";
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(784, 451);
+            this.Controls.Add(this.label2);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.tasksYBar);
             this.Controls.Add(this.tasksXBar);
@@ -243,6 +254,7 @@ namespace CSharpTestTask
         private System.Windows.Forms.HScrollBar tasksXBar;
         private System.Windows.Forms.VScrollBar tasksYBar;
         private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.Label label2;
     }
 }
 

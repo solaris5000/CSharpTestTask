@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Bitlush;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -25,7 +26,13 @@ namespace CSharpTestTask
             this.tasks_pending = 0;
             this.tasks_jeopardy = 0;
 
-            for (int i = 0; i < 1000; i++)
+            if (TasksTree.Count() > 0)
+            {
+
+                TasksTree = new AvlTree<DateTime, Task>();
+            }
+
+            for (int i = 0; i < 50; i++)
             {
                 Task temp = new Task();
 
@@ -43,12 +50,7 @@ namespace CSharpTestTask
                 {
                     tasks_pending++;
                 }
-                TasksTree.Insert(temp.getId(), temp);
-            }
-
-            foreach (var task in this.TasksTree)
-            {
-                task.Value.consoleOutput();
+                TasksTree.Insert(temp.getStartTime(), temp);
             }
 
             labelCompleted.Text = "Completed " + this.tasks_completed.ToString();
@@ -135,9 +137,9 @@ namespace CSharpTestTask
 
         private void Form1_Resize(object sender, EventArgs e)
         {
-            topBar = new Rectangle(0, 0, this.Size.Width, 60);
-            midBar = new Rectangle(0, 60, this.Size.Width, 40);
-            botBar = new Rectangle(0, 100, this.Size.Width, this.Size.Height - 100);
+            topBar.Size = new Size(this.Size.Width, 60);
+            midBar.Size = new Size(this.Size.Width, 40);
+            botBar.Size = new Size(this.Size.Width, this.Size.Height - 100);
 
             tasksXBar.Location = new System.Drawing.Point(0, this.Height - 56);
             tasksXBar.Width = this.Width - 35;
@@ -173,7 +175,11 @@ namespace CSharpTestTask
             CompletedIcon.BackColor = System.Drawing.Color.Transparent;
             PendingIcon.BackColor = System.Drawing.Color.Transparent;
             JeopardyIcon.BackColor = System.Drawing.Color.Transparent;
-            
+
+            labelCompleted.Text = "Completed " + this.tasks_completed.ToString();
+            labeljeopardy.Text = "Pending " + this.tasks_pending.ToString();
+            labelpending.Text = "Jeopardy " + this.tasks_jeopardy.ToString();
+
             topBar = new Rectangle(0, 0, this.Size.Width, 60);
             midBar = new Rectangle(0, 60, this.Size.Width, 40);
             botBar = new Rectangle(0, 100, this.Size.Width, this.Size.Height - 100);
@@ -227,11 +233,13 @@ namespace CSharpTestTask
 
            
 
-            var current_hour_view = DateTime.Today.AddHours(((double)(tasksXBar.Value-1) / (double)tasksXBar.Maximum) * 24.0D);
-
+            DateTime cutOffStartDT = DateTime.Now;
+            if (TasksTree.Count() != 0)
+            {
+                label2.Text = cutOffStartDT.ToString() + " " + TasksTree.Last().Value.getEndTime();
+            }
 
             // Рисуем поле для тасков
-
             e.Graphics.FillRectangle(grayBrush, botBar);
             e.Graphics.DrawRectangle(borderPen, botBar);
             // Рисуем меню сверху
