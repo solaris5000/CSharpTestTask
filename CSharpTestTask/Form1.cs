@@ -198,6 +198,7 @@ namespace CSharpTestTask
 
         private void Form1_Load(object sender, EventArgs e)
         {
+
             labelCompleted.BackColor = System.Drawing.Color.Transparent;
             labelpending.BackColor = System.Drawing.Color.Transparent;
             labeljeopardy.BackColor = System.Drawing.Color.Transparent;
