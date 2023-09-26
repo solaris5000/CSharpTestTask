@@ -25,9 +25,10 @@ namespace CSharpTestTask
         private Bitlush.AvlTree<DateTime, Task> TasksTree = new AvlTree<DateTime, Task>();
 
 
-        int x_task_dispose = 0;
-        int y_task_dispose = 0;
         int x_scale = 1;
+
+        DateTime cutOffStartDT = DateTime.Today;
+        DateTime cutOffEndDT = DateTime.Today.AddDays(1);
 
         Pen blackPen = new Pen(Color.Black, 4);
         Pen borderPen = new Pen(Color.Black, 1);
@@ -199,7 +200,6 @@ namespace CSharpTestTask
             this.label1.Size = new System.Drawing.Size(35, 13);
             this.label1.TabIndex = 11;
             this.label1.Text = "label1";
-            this.label1.Visible = false;
             // 
             // label2
             // 
