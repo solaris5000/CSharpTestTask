@@ -51,7 +51,7 @@ namespace CSharpTestTask
 
         public Task()
         {
-            startTime = DateTime.Today.AddSeconds(random.Next(0, 86000));
+            startTime = DateTime.Today.AddSeconds(random.Next(1700, 80000));
             endTime = startTime.AddSeconds(random.Next(100, (int)(DateTime.Today.AddDays(1) - startTime).TotalSeconds) / 5);
             enabled = random.Next(0, 2) == 1;
             id = idCounter++;
@@ -72,7 +72,7 @@ namespace CSharpTestTask
 
         ~Task()
         {
-            Console.WriteLine("Dropping task");
+            //Console.WriteLine("Dropping task");
         }
     }
 }

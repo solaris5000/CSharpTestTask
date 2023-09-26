@@ -19,9 +19,12 @@ namespace CSharpTestTask
     
     public partial class Form1 : Form
     {
-        DateTime dttemp = DateTime.Today;
-        private void generate_tasks()
+        
+        private void generate_tasks(int taskcount)
         {
+            DateTime dttemp = DateTime.Today;
+
+            cutOffEndDT = dttemp;
             this.tasks_completed = 0;
             this.tasks_pending = 0;
             this.tasks_jeopardy = 0;
@@ -32,7 +35,7 @@ namespace CSharpTestTask
                 TasksTree = new AvlTree<DateTime, Task>();
             }
 
-            for (int i = 0; i < 50; i++)
+            for (int i = 0; i < taskcount; i++)
             {
                 Task temp = new Task();
 
@@ -55,6 +58,7 @@ namespace CSharpTestTask
                 {
                     dttemp = temp.getEndTime();
                 }
+
                 TasksTree.Insert(temp.getStartTime(), temp);
                 
             }
@@ -103,7 +107,7 @@ namespace CSharpTestTask
 
         private void button1_Click(object sender, EventArgs e)
         {
-            generate_tasks();
+            generate_tasks(100);
 
         }
 
@@ -169,7 +173,21 @@ namespace CSharpTestTask
                 tasksYBar.Visible = true;
                 tasksYBar.Maximum = taskYBarHeight + 25;
             }
-            
+
+            int rw = this.Width - 15;
+            var xbarmax = (int)(rw * x_scale - rw);
+            if (x_scale == 1)
+            {
+                tasksXBar.Maximum = 0;
+                tasksXBar.Value = 0;
+                tasksXBar.Enabled = false;
+            }
+            else
+            {
+                tasksXBar.Maximum = xbarmax;
+                tasksXBar.Enabled = true;
+            }
+
             this.button1.Location = new Point(this.Size.Width - 200, this.button1.Location.Y);
         }
 
@@ -239,7 +257,8 @@ namespace CSharpTestTask
         {
             
             
-            System.Drawing.Font drawFont = new System.Drawing.Font("Arial", 16);
+            System.Drawing.Font drawFont = new System.Drawing.Font("Arial", 12);
+            System.Drawing.Font drawFontTask = new System.Drawing.Font("Arial", 8);
             System.Drawing.SolidBrush drawBrush = new System.Drawing.SolidBrush(System.Drawing.Color.Black);
             System.Drawing.StringFormat drawFormat = new System.Drawing.StringFormat();
 
@@ -254,7 +273,7 @@ namespace CSharpTestTask
                 //cutOffStartDT = TasksTree.First().Value.getStartTime();
 
                 //cutOffEndDT = TasksTree.Last().Value.getEndTime();
-                label2.Text = cutOffStartDT.ToString() + " " + TasksTree.Last().Value.getEndTime();
+                label2.Text = cutOffStartDT.ToString() + " " + cutOffEndDT.ToString();
             }
             double displace_to_left = (cutOffStartDT - DateTime.Today).TotalSeconds / TimeSpan.FromDays(1).TotalSeconds;
             TimeSpan renderTime = cutOffEndDT - cutOffStartDT;
@@ -308,20 +327,18 @@ namespace CSharpTestTask
 
 
             // Рисуем временную разметку наверху и на поле тасков.
-            double tl_jj = 0;
-            double tl_xx = 0;
             int tl_x = 0;
             int tl_j = 0;
             
                 for (int i = 0; i < 24; i++)
                 {
-                    tl_xx = ((
+                    tl_x = (int)((
                     (render_w / 24.0D) * i * x_scale * timeBasedScale) - 
-                    ((render_w / tasksXBar.Maximum) * tasksXBar.Value) * x_scale * timeBasedScale - 
+                    //((render_w / tasksXBar.Maximum) * tasksXBar.Value) * x_scale * timeBasedScale - 
+                    + tasksXBar.Value -
                     (displace_to_left*render_w) * x_scale * timeBasedScale);
 
-                Console.WriteLine("tl_x = " + tl_x + " | width = " + render_w);
-                tl_x = (int)tl_xx;
+                //Console.WriteLine("tl_x = " + tl_x + " | width = " + render_w);
                     if (tl_x >= render_w)
                     {
                         break;
@@ -335,11 +352,11 @@ namespace CSharpTestTask
                             i.ToString(),
                             drawFont, drawBrush, tl_x + 5, 15, drawFormat);
 
-                    tl_jj = (((
-                    ((render_w / 24.0D) * (i + 1) * x_scale * timeBasedScale) - 
-                    ((render_w / tasksXBar.Maximum) * tasksXBar.Value) * x_scale * timeBasedScale - 
+                    tl_j = (int)(((
+                    ((render_w / 24.0D) * (i + 1) * x_scale * timeBasedScale) -
+                    //((render_w / tasksXBar.Maximum) * tasksXBar.Value) * x_scale * timeBasedScale - 
+                    + tasksXBar.Value -
                     (displace_to_left * render_w) * x_scale * timeBasedScale) - tl_x) / 2);
-                tl_j = (int)tl_jj;
                     if (tl_x + tl_j / 2 + tl_j < 0)
                     {
                         continue;
@@ -370,31 +387,27 @@ namespace CSharpTestTask
             //  Рисуем сами таски
             foreach (var task in this.TasksTree)
             {
-                // Пропускаем рендер таски, если данный ресурс не в нужно время
-                /*if (task.Value.getEndTime() < current_hour_view || task.Value.getStartTime() > current_hour_view)
-                {
-                    continue;
-                }*/
-
-                var start_percent = (task.Value.getStartTime() - DateTime.Today).TotalDays;
-                var end_percent = (task.Value.getEndTime() - DateTime.Today).TotalDays;
-                var rand = new Random();
+                var start_percent = (task.Value.getStartTime() - cutOffStartDT).TotalDays;
+                var end_percent = (task.Value.getEndTime() - cutOffStartDT).TotalDays;
 
                 //Console.WriteLine("Id " + task.Value.getId() + " start :  " + start_percent + " end " + end_percent);
 
                 var x_x = this.Size.Width;
                 //var rect = new Rectangle((int)(this.Size.Width * start_percent) - (render_w / x_scale) * (x_scale - tasksXBar.Value), 200 + task.Value.getLayer() * 25, (int)(this.Size.Width * (end_percent - start_percent)), (int)(25 * drawscale));
                 taskRectangle.Location = new Point(
-                /*x*/(int)(
-                (render_w * start_percent * x_scale * timeBasedScale) 
-                - ((render_w / tasksXBar.Maximum) * tasksXBar.Value) * x_scale * timeBasedScale
-                - (int)(displace_to_left * render_w) * x_scale * timeBasedScale),
+                /*x*/
+                (int)(
+                (render_w * start_percent * x_scale * timeBasedScale)
+                //- ((render_w / tasksXBar.Maximum) * tasksXBar.Value) * x_scale * timeBasedScale
+                - tasksXBar.Value),
+                //(displace_to_left * render_w) * x_scale * timeBasedScale * (end_percent - start_percent)),
                 //(int)(this.Size.Width * start_percent) - (this.Size.Width / x_scale) * tasksXBar.Value + 50,
                 /*y*/    100 - 30 + task.Value.getLayer() * TASK_ROW_HEIGHT - tasksYBar.Value + 2);
 
                 taskRectangle.Width = (int)(this.Size.Width * (end_percent - start_percent) * x_scale * timeBasedScale);
                 taskRectangle.Height = (int)(TASK_ROW_HEIGHT * drawscale-2);
 
+                // Пропускаем рендер таски, если данный ресурс не в нужно время
                 if (!(
                     (taskRectangle.Location.X >= 0 && taskRectangle.Location.X < render_w) || 
                     (taskRectangle.Location.X + taskRectangle.Width >= 0)))
@@ -425,19 +438,22 @@ namespace CSharpTestTask
                     e.Graphics.FillRectangle(opacityBrush, taskRectangle);
                 }
                 e.Graphics.DrawRectangle(borderPen, taskRectangle);
+
                 if (taskRectangle.X > 0)
                 {
                     e.Graphics.DrawString(
-                        task.Value.getStartTime().TimeOfDay.ToString() + " | " + task.Value.getEndTime().TimeOfDay.ToString() +  
-                        " X = " + taskRectangle.X.ToString() + "| X + W = "+ (taskRectangle.X + taskRectangle.Width).ToString(),
-                        drawFont, drawBrush, taskRectangle.X, taskRectangle.Y, drawFormat);
+                        //task.Value.getStartTime().TimeOfDay.ToString() + " | " + task.Value.getEndTime().TimeOfDay.ToString() +  
+                        //" X = " + taskRectangle.X.ToString() + "| X + W = "+ (taskRectangle.X + taskRectangle.Width).ToString(),
+                        "ID " + task.Value.getId().ToString() + " | " + task.Value.getStartTime().Hour + ":" + task.Value.getStartTime().Minute + " - " + task.Value.getEndTime().Hour + ":" + task.Value.getEndTime().Minute,
+                        drawFontTask, drawBrush, taskRectangle.X, taskRectangle.Y, drawFormat);
                 }
                 else
                 {
                     e.Graphics.DrawString(
-                        task.Value.getStartTime().TimeOfDay.ToString() + " | " + task.Value.getEndTime().TimeOfDay.ToString() + 
-                        " X = " + taskRectangle.X.ToString() + "| X + W = " + (taskRectangle.X + taskRectangle.Width).ToString(),
-                        drawFont, drawBrush, 50, taskRectangle.Y, drawFormat);
+                        // task.Value.getStartTime().TimeOfDay.ToString() + " | " + task.Value.getEndTime().TimeOfDay.ToString() + 
+                        //" X = " + taskRectangle.X.ToString() + "| X + W = " + (taskRectangle.X + taskRectangle.Width).ToString(),
+                        "ID " + task.Value.getId().ToString() + " | " + task.Value.getStartTime().Hour + ":" + task.Value.getStartTime().Minute + " - " + task.Value.getEndTime().Hour + ":" + task.Value.getEndTime().Minute,
+                        drawFontTask, drawBrush, 0, taskRectangle.Y, drawFormat);
                 }
             }
 
@@ -451,9 +467,10 @@ namespace CSharpTestTask
             //label1.Text = "View near " + current_hour_view + " hrs | x_scale = " + x_scale;
             // Рисуем линию прогресса дня
             int x = (int)(
-                (render_w * this.day_left_percentage * x_scale * timeBasedScale) - 
-                ((render_w / tasksXBar.Maximum) * tasksXBar.Value) * x_scale * timeBasedScale - 
-                (int)(displace_to_left * render_w) * x_scale * timeBasedScale);
+                (render_w * this.day_left_percentage * x_scale * timeBasedScale) -
+                //((render_w / tasksXBar.Maximum) * tasksXBar.Value) * x_scale * timeBasedScale - 
+                +tasksXBar.Value -
+                (displace_to_left * render_w) * x_scale * timeBasedScale);
             //int x = (int)(this.Size.Width * this.day_left_percentage) - (render_w / x_scale) * tasksXBar.Value;
             int X1 = x, Y1 = 0, X2 = x, Y2 = this.Size.Height;
             e.Graphics.DrawLine(blackPen, X1, Y1, X2, Y2);
@@ -511,13 +528,15 @@ namespace CSharpTestTask
                 
             }
 
-            var xbarmax = (int)(x_scale / 2) * 50;
-            if (xbarmax == 0)
+            int rw = this.Width - 15;
+            var xbarmax = (int)(rw * x_scale - rw);
+            if (x_scale == 1)
             {
-                tasksXBar.Maximum = 1;
+                tasksXBar.Maximum = 0;
                 tasksXBar.Value = 0;
                 tasksXBar.Enabled = false; 
-            }else
+            }
+            else
             {
                 tasksXBar.Maximum = xbarmax;
                 tasksXBar.Enabled = true;
@@ -532,7 +551,7 @@ namespace CSharpTestTask
                 
 
             tasksXBar.Invalidate();
-            Console.WriteLine(e.KeyChar.ToString() + " " + x_scale + " " + tasksXBar.Maximum);
+            //Console.WriteLine(e.KeyChar.ToString() + " " + x_scale + " " + tasksXBar.Maximum);
         }
     }
 }
