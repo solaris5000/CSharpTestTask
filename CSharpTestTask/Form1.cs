@@ -246,7 +246,7 @@ namespace CSharpTestTask
 
 
 
-            int render_w = this.Size.Width;
+            double render_w = this.Size.Width-15;
 
             //Откуда и докуда рисовать трафик надо
             if (TasksTree.Count() != 0)
@@ -294,32 +294,35 @@ namespace CSharpTestTask
                     e.Graphics.DrawLine(taskBackgroundPenDark,
                         0,
                         rowlines_y,
-                        this.Width,
+                        (float)render_w,
                         rowlines_y);
                 } else
                 {
                     e.Graphics.DrawLine(taskBackgroundPenLight,
                         0,
                         rowlines_y,
-                        this.Width,
+                        (float)render_w,
                         rowlines_y);
                 }
             }
 
 
             // Рисуем временную разметку наверху и на поле тасков.
-            var tl_j = 0;
-            var tl_x = 0;
+            double tl_jj = 0;
+            double tl_xx = 0;
+            int tl_x = 0;
+            int tl_j = 0;
             
                 for (int i = 0; i < 24; i++)
                 {
-                    tl_x = (int)((
-                    (this.Width / 24.0D) * i * x_scale * timeBasedScale) - 
-                    ((this.Width / tasksXBar.Maximum) * tasksXBar.Value) * x_scale * timeBasedScale - 
-                    (displace_to_left*this.Width) * x_scale * timeBasedScale);
+                    tl_xx = ((
+                    (render_w / 24.0D) * i * x_scale * timeBasedScale) - 
+                    ((render_w / tasksXBar.Maximum) * tasksXBar.Value) * x_scale * timeBasedScale - 
+                    (displace_to_left*render_w) * x_scale * timeBasedScale);
 
-
-                    if (tl_x > this.Width)
+                Console.WriteLine("tl_x = " + tl_x + " | width = " + render_w);
+                tl_x = (int)tl_xx;
+                    if (tl_x >= render_w)
                     {
                         break;
                     }
@@ -332,11 +335,11 @@ namespace CSharpTestTask
                             i.ToString(),
                             drawFont, drawBrush, tl_x + 5, 15, drawFormat);
 
-                    tl_j = (int)(((
-                    ((this.Width / 24.0D) * (i + 1) * x_scale * timeBasedScale) - 
-                    ((this.Width / tasksXBar.Maximum) * tasksXBar.Value) * x_scale * timeBasedScale - 
-                    (displace_to_left * this.Width) * x_scale * timeBasedScale) - tl_x) / 2);
-
+                    tl_jj = (((
+                    ((render_w / 24.0D) * (i + 1) * x_scale * timeBasedScale) - 
+                    ((render_w / tasksXBar.Maximum) * tasksXBar.Value) * x_scale * timeBasedScale - 
+                    (displace_to_left * render_w) * x_scale * timeBasedScale) - tl_x) / 2);
+                tl_j = (int)tl_jj;
                     if (tl_x + tl_j / 2 + tl_j < 0)
                     {
                         continue;
@@ -364,9 +367,8 @@ namespace CSharpTestTask
                             60);
                 }
 
-
-                //  Рисуем сами таски
-                foreach (var task in this.TasksTree)
+            //  Рисуем сами таски
+            foreach (var task in this.TasksTree)
             {
                 // Пропускаем рендер таски, если данный ресурс не в нужно время
                 /*if (task.Value.getEndTime() < current_hour_view || task.Value.getStartTime() > current_hour_view)
@@ -381,12 +383,12 @@ namespace CSharpTestTask
                 //Console.WriteLine("Id " + task.Value.getId() + " start :  " + start_percent + " end " + end_percent);
 
                 var x_x = this.Size.Width;
-                //var rect = new Rectangle((int)(this.Size.Width * start_percent) - (this.Width / x_scale) * (x_scale - tasksXBar.Value), 200 + task.Value.getLayer() * 25, (int)(this.Size.Width * (end_percent - start_percent)), (int)(25 * drawscale));
+                //var rect = new Rectangle((int)(this.Size.Width * start_percent) - (render_w / x_scale) * (x_scale - tasksXBar.Value), 200 + task.Value.getLayer() * 25, (int)(this.Size.Width * (end_percent - start_percent)), (int)(25 * drawscale));
                 taskRectangle.Location = new Point(
                 /*x*/(int)(
-                (this.Width * start_percent * x_scale * timeBasedScale) 
-                - ((this.Width / tasksXBar.Maximum) * tasksXBar.Value) * x_scale * timeBasedScale
-                - (int)(displace_to_left * this.Width) * x_scale * timeBasedScale),
+                (render_w * start_percent * x_scale * timeBasedScale) 
+                - ((render_w / tasksXBar.Maximum) * tasksXBar.Value) * x_scale * timeBasedScale
+                - (int)(displace_to_left * render_w) * x_scale * timeBasedScale),
                 //(int)(this.Size.Width * start_percent) - (this.Size.Width / x_scale) * tasksXBar.Value + 50,
                 /*y*/    100 - 30 + task.Value.getLayer() * TASK_ROW_HEIGHT - tasksYBar.Value + 2);
 
@@ -394,7 +396,7 @@ namespace CSharpTestTask
                 taskRectangle.Height = (int)(TASK_ROW_HEIGHT * drawscale-2);
 
                 if (!(
-                    (taskRectangle.Location.X >= 0 && taskRectangle.Location.X < this.Width) || 
+                    (taskRectangle.Location.X >= 0 && taskRectangle.Location.X < render_w) || 
                     (taskRectangle.Location.X + taskRectangle.Width >= 0)))
                 {
                     continue;
@@ -449,10 +451,10 @@ namespace CSharpTestTask
             //label1.Text = "View near " + current_hour_view + " hrs | x_scale = " + x_scale;
             // Рисуем линию прогресса дня
             int x = (int)(
-                (this.Width * this.day_left_percentage * x_scale * timeBasedScale) - 
-                ((this.Width / tasksXBar.Maximum) * tasksXBar.Value) * x_scale * timeBasedScale - 
-                (int)(displace_to_left * this.Width) * x_scale * timeBasedScale);
-            //int x = (int)(this.Size.Width * this.day_left_percentage) - (this.Width / x_scale) * tasksXBar.Value;
+                (render_w * this.day_left_percentage * x_scale * timeBasedScale) - 
+                ((render_w / tasksXBar.Maximum) * tasksXBar.Value) * x_scale * timeBasedScale - 
+                (int)(displace_to_left * render_w) * x_scale * timeBasedScale);
+            //int x = (int)(this.Size.Width * this.day_left_percentage) - (render_w / x_scale) * tasksXBar.Value;
             int X1 = x, Y1 = 0, X2 = x, Y2 = this.Size.Height;
             e.Graphics.DrawLine(blackPen, X1, Y1, X2, Y2);
         }
