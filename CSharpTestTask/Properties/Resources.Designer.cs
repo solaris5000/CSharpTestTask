@@ -73,6 +73,16 @@ namespace CSharpTestTask.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap error_svgrepo_com {
+            get {
+                object obj = ResourceManager.GetObject("error-svgrepo-com", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap Generate_Schedule {
             get {
                 object obj = ResourceManager.GetObject("Generate_Schedule", resourceCulture);
@@ -96,6 +106,16 @@ namespace CSharpTestTask.Properties {
         internal static System.Drawing.Bitmap Generate_Schedule_pressed {
             get {
                 object obj = ResourceManager.GetObject("Generate_Schedule_pressed", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap Warning {
+            get {
+                object obj = ResourceManager.GetObject("Warning", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

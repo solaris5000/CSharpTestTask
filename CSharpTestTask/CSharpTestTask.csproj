@@ -96,5 +96,11 @@
   <ItemGroup>
     <None Include="Resources\Generate_Schedule_pressed.png" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Warning.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\error-svgrepo-com.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

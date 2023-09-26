@@ -64,8 +64,8 @@ namespace CSharpTestTask
             }
 
             labelCompleted.Text = "Completed " + this.tasks_completed.ToString();
-            labeljeopardy.Text = "Pending " + this.tasks_pending.ToString();
-            labelpending.Text = "Jeopardy " + this.tasks_jeopardy.ToString();
+            labelpending.Text = "Pending " + this.tasks_pending.ToString();
+            labeljeopardy.Text = "Jeopardy " + this.tasks_jeopardy.ToString();
 
             Task drop = new Task();
             drop.dropId();
@@ -91,11 +91,11 @@ namespace CSharpTestTask
 
 
             this.JeopardyIcon.Location = new System.Drawing.Point(130, second_bar_y);
-            this.labeljeopardy.Location = new System.Drawing.Point(this.JeopardyIcon.Location.X + 30, second_bar_y);
+            this.labelpending.Location = new System.Drawing.Point(this.JeopardyIcon.Location.X + 30, second_bar_y);
 
 
             this.PendingIcon.Location = new System.Drawing.Point(250, second_bar_y);
-            this.labelpending.Location = new System.Drawing.Point(this.PendingIcon.Location.X + 30, second_bar_y);
+            this.labeljeopardy.Location = new System.Drawing.Point(this.PendingIcon.Location.X + 30, second_bar_y);
 
 
         }
@@ -199,16 +199,16 @@ namespace CSharpTestTask
         private void Form1_Load(object sender, EventArgs e)
         {
             labelCompleted.BackColor = System.Drawing.Color.Transparent;
-            labeljeopardy.BackColor = System.Drawing.Color.Transparent;
             labelpending.BackColor = System.Drawing.Color.Transparent;
+            labeljeopardy.BackColor = System.Drawing.Color.Transparent;
             button1.BackColor = System.Drawing.Color.Transparent;
             CompletedIcon.BackColor = System.Drawing.Color.Transparent;
             PendingIcon.BackColor = System.Drawing.Color.Transparent;
             JeopardyIcon.BackColor = System.Drawing.Color.Transparent;
 
             labelCompleted.Text = "Completed " + this.tasks_completed.ToString();
-            labeljeopardy.Text = "Pending " + this.tasks_pending.ToString();
-            labelpending.Text = "Jeopardy " + this.tasks_jeopardy.ToString();
+            labelpending.Text = "Pending " + this.tasks_pending.ToString();
+            labeljeopardy.Text = "Jeopardy " + this.tasks_jeopardy.ToString();
 
             topBar = new Rectangle(0, 0, this.Size.Width, 60);
             midBar = new Rectangle(0, 60, this.Size.Width, 40);
