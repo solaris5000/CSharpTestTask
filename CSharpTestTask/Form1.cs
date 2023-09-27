@@ -107,7 +107,8 @@ namespace CSharpTestTask
 
         private void button1_Click(object sender, EventArgs e)
         {
-            generate_tasks(100);
+            var rand = new Random();
+            generate_tasks(rand.Next(100, 10001));
 
         }
 
