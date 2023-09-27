@@ -6,6 +6,7 @@ using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Net.Http.Headers;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
@@ -321,10 +322,10 @@ namespace CSharpTestTask
 
 
             // Рисуем временную разметку наверху и на поле тасков.
-            int tl_x = 0;
-            int tl_j = 0;
             
-                for (int i = 0; i < 24; i++)
+            
+
+            for (int i = 0, tl_j = 0, tl_x = 0; i < 24; i++)
                 {
                     tl_x = (int)((
                     (render_w / 24.0D) * i * x_scale * timeBasedScale) - 
@@ -378,7 +379,7 @@ namespace CSharpTestTask
                             60);
                 }
 
-            //  Рисуем сами таски
+            //  Рисуем сами таски            
             foreach (var task in this.TasksTree)
             {
                 // Пропускаем рендер таски, если данный ресурс не в нужно время, данный вариант должен работать лучше,
