@@ -32,7 +32,7 @@ namespace CSharpTestTask
         // Масштаб отрисовки, более не используется
         //double drawscale = 1.0D;
 
-        private Bitlush.AvlTree<DateTime, Task> GlobalTasksTree = new AvlTree<DateTime, Task>();
+        private Bitlush.AvlTree<DateTime, Task> TasksTree = new AvlTree<DateTime, Task>();
 
         // Мастштаб приближения виджета, регулируется кнопками + - на клавиатуре
         int x_scale = 1;
