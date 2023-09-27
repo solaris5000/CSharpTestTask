@@ -1,10 +1,18 @@
 ﻿using Bitlush;
 using System;
 using System.Drawing;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace CSharpTestTask
 {
+
+
+    struct renderTimeFrame
+    {
+        public DateTime start;
+        public DateTime end;
+    }
     partial class Form1
     {
         /// <summary>
@@ -18,18 +26,23 @@ namespace CSharpTestTask
         protected double day_left_percentage;
         int second_bar_y;
 
+        // Выстота строки задачи
         const int TASK_ROW_HEIGHT = 30;
 
-        double drawscale = 1.0D;
+        // Масштаб отрисовки, более не используется
+        //double drawscale = 1.0D;
 
-        private Bitlush.AvlTree<DateTime, Task> TasksTree = new AvlTree<DateTime, Task>();
+        private Bitlush.AvlTree<DateTime, Task> GlobalTasksTree = new AvlTree<DateTime, Task>();
 
-
+        // Мастштаб приближения виджета, регулируется кнопками + - на клавиатуре
         int x_scale = 1;
 
+        // Для манипуляций с рамками рендера
         DateTime cutOffStartDT = DateTime.Today;
         DateTime cutOffEndDT = DateTime.Today.AddDays(1);
+        renderTimeFrame renderFrame = new renderTimeFrame { start = DateTime.Today, end = DateTime.Today.AddDays(1) };
 
+        // Переменные для рисования графики
         Pen blackPen = new Pen(Color.Black, 4);
         Pen borderPen = new Pen(Color.Black, 1);
         Pen darkGrayPen = new Pen(Color.DarkGray, 4);
@@ -48,8 +61,13 @@ namespace CSharpTestTask
         SolidBrush redBrush = new SolidBrush(Color.FromArgb(170, 255, 50, 50));
         SolidBrush opacityBrush = new SolidBrush(Color.FromArgb(80, 170, 170, 170));
 
-        Rectangle taskRectangle = new Rectangle(0, 0, 0, 0);
+        System.Drawing.Font drawFont = new System.Drawing.Font("Arial", 12);
+        System.Drawing.Font drawFontTask = new System.Drawing.Font("Arial", 8);
+        System.Drawing.SolidBrush drawBrush = new System.Drawing.SolidBrush(System.Drawing.Color.Black);
+        System.Drawing.StringFormat drawFormat = new System.Drawing.StringFormat();
 
+        // Примитивы фигур для рисовок
+        Rectangle taskRectangle = new Rectangle(0, 0, 0, 0);
         Rectangle topBar = new Rectangle(0, 0, 0, 0);
         Rectangle midBar = new Rectangle(0, 0, 0, 0);
         Rectangle botBar = new Rectangle(0, 0, 0, 0);
@@ -126,7 +144,7 @@ namespace CSharpTestTask
             // 
             // tasksXBar
             // 
-            this.tasksXBar.LargeChange = 1;
+            this.tasksXBar.LargeChange = 15;
             this.tasksXBar.Location = new System.Drawing.Point(0, 430);
             this.tasksXBar.Maximum = 999;
             this.tasksXBar.Name = "tasksXBar";

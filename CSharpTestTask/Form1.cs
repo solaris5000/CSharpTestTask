@@ -16,10 +16,10 @@ using static System.Windows.Forms.VisualStyles.VisualStyleElement.Rebar;
 
 namespace CSharpTestTask
 {
-    
+
     public partial class Form1 : Form
     {
-        
+
         private void generate_tasks(int taskcount)
         {
             DateTime dttemp = DateTime.Today;
@@ -39,19 +39,15 @@ namespace CSharpTestTask
             {
                 Task temp = new Task();
 
-                if (temp.getStatus() == TaskStatus.Completed)
+                if (temp.isEnabled())
                 {
-                    tasks_completed++;
-                }
+                    switch (temp.getStatus())
+                    {
+                        case TaskStatus.Jeopardy: { tasks_jeopardy++; }; break;
+                        case TaskStatus.Pending: { tasks_pending++; }; break;
+                        default: { tasks_completed++; }; break;
+                    }
 
-                if (temp.getStatus() == TaskStatus.Jeopardy)
-                {
-                    tasks_jeopardy++;
-                }
-
-                if (temp.getStatus() == TaskStatus.Pending)
-                {
-                    tasks_pending++;
                 }
 
                 if (temp.getEndTime() > dttemp)
@@ -60,7 +56,7 @@ namespace CSharpTestTask
                 }
 
                 TasksTree.Insert(temp.getStartTime(), temp);
-                
+
             }
 
             labelCompleted.Text = "Completed " + this.tasks_completed.ToString();
@@ -76,6 +72,7 @@ namespace CSharpTestTask
 
             //cutOffEndDT = TasksTree.Last().Value.getEndTime();
         }
+
         public Form1()
         {
             InitializeComponent();
@@ -107,7 +104,9 @@ namespace CSharpTestTask
 
         private void button1_Click(object sender, EventArgs e)
         {
-            generate_tasks(100);
+            var rand = new Random();
+            generate_tasks(rand.Next(100, 10001));
+            recalculateRenderTimeFrame();
 
         }
 
@@ -153,15 +152,19 @@ namespace CSharpTestTask
 
         private void Form1_Resize(object sender, EventArgs e)
         {
+            // Установка необходимых значений для примитивов менюшек
             topBar.Size = new Size(this.Size.Width, 60);
             midBar.Size = new Size(this.Size.Width, 40);
             botBar.Size = new Size(this.Size.Width, this.Size.Height - 100);
 
+
+            this.button1.Location = new Point(this.Size.Width - 200, this.button1.Location.Y);
             tasksXBar.Location = new System.Drawing.Point(0, this.Height - 56);
             tasksXBar.Width = this.Width - 35;
             tasksYBar.Location = new System.Drawing.Point(this.Width - 35, tasksYBar.Location.Y);
             tasksYBar.Height = this.Height - 156;
 
+            // Подгонка скрола по оси Y, в случае изменения размера окна
             var taskYBarHeight = (25 * 21) - (this.Height - 156);
             if (taskYBarHeight <= 0)
             {
@@ -174,6 +177,8 @@ namespace CSharpTestTask
                 tasksYBar.Maximum = taskYBarHeight + 25;
             }
 
+            // Подгонка скрола по оси X, в случае изменения размера окна
+            // Фактическая ширина отрисовки окна на мониторе на 15 пикселей меньше, чем в переменной Width, затем отнимаем 15 пикселей для работы с шириной
             int rw = this.Width - 15;
             var xbarmax = (int)(rw * x_scale - rw);
             if (x_scale == 1)
@@ -188,7 +193,7 @@ namespace CSharpTestTask
                 tasksXBar.Enabled = true;
             }
 
-            this.button1.Location = new Point(this.Size.Width - 200, this.button1.Location.Y);
+            
         }
 
         private void panel2_Paint(object sender, PaintEventArgs e)
@@ -251,21 +256,14 @@ namespace CSharpTestTask
                 tasksXBar.Maximum = xbarmax;
                 tasksXBar.Enabled = true;
             }
+
+            recalculateRenderTimeFrame();
         }
 
         private void Form1_Paint(object sender, PaintEventArgs e)
         {
-            
-            
-            System.Drawing.Font drawFont = new System.Drawing.Font("Arial", 12);
-            System.Drawing.Font drawFontTask = new System.Drawing.Font("Arial", 8);
-            System.Drawing.SolidBrush drawBrush = new System.Drawing.SolidBrush(System.Drawing.Color.Black);
-            System.Drawing.StringFormat drawFormat = new System.Drawing.StringFormat();
-
-
-
-
             double render_w = this.Size.Width-15;
+
 
             //Откуда и докуда рисовать трафик надо
             if (TasksTree.Count() != 0)
@@ -273,17 +271,13 @@ namespace CSharpTestTask
                 //cutOffStartDT = TasksTree.First().Value.getStartTime();
 
                 //cutOffEndDT = TasksTree.Last().Value.getEndTime();
-                label2.Text = cutOffStartDT.ToString() + " " + cutOffEndDT.ToString();
+                //label2.Text = cutOffStartDT.ToString() + " " + cutOffEndDT.ToString();
             }
             double displace_to_left = (cutOffStartDT - DateTime.Today).TotalSeconds / TimeSpan.FromDays(1).TotalSeconds;
-            TimeSpan renderTime = cutOffEndDT - cutOffStartDT;
             double timeBasedScale = TimeSpan.FromDays(1).TotalSeconds / (cutOffEndDT - cutOffStartDT).TotalSeconds;
             
             
-            //double x_scale = this.x_scale * timeBasedScale;
-            
-            
-            label1.Text = displace_to_left.ToString() + " | " + timeBasedScale.ToString();
+            //label1.Text = displace_to_left.ToString() + " | " + timeBasedScale.ToString();
 
             // Рисуем поле для тасков
             e.Graphics.FillRectangle(grayBrush, botBar);
@@ -387,12 +381,17 @@ namespace CSharpTestTask
             //  Рисуем сами таски
             foreach (var task in this.TasksTree)
             {
-                var start_percent = (task.Value.getStartTime() - cutOffStartDT).TotalDays;
-                var end_percent = (task.Value.getEndTime() - cutOffStartDT).TotalDays;
+                // Пропускаем рендер таски, если данный ресурс не в нужно время, данный вариант должен работать лучше,
+                // ибо мы не калькулируем координаты каждого таска перед отсечением по оси X
+                if (task.Value.getStartTime() > renderFrame.end ||  task.Value.getEndTime() < renderFrame.start)
+                {
+                    continue;
+                }
+
+                double start_percent = (task.Value.getStartTime() - cutOffStartDT).TotalDays;
+                double end_percent = (task.Value.getEndTime() - cutOffStartDT).TotalDays;
 
                 //Console.WriteLine("Id " + task.Value.getId() + " start :  " + start_percent + " end " + end_percent);
-
-                var x_x = this.Size.Width;
                 //var rect = new Rectangle((int)(this.Size.Width * start_percent) - (render_w / x_scale) * (x_scale - tasksXBar.Value), 200 + task.Value.getLayer() * 25, (int)(this.Size.Width * (end_percent - start_percent)), (int)(25 * drawscale));
                 taskRectangle.Location = new Point(
                 /*x*/
@@ -405,17 +404,20 @@ namespace CSharpTestTask
                 /*y*/    100 - 30 + task.Value.getLayer() * TASK_ROW_HEIGHT - tasksYBar.Value + 2);
 
                 taskRectangle.Width = (int)(this.Size.Width * (end_percent - start_percent) * x_scale * timeBasedScale);
-                taskRectangle.Height = (int)(TASK_ROW_HEIGHT * drawscale-2);
+                //taskRectangle.Height = (int)(TASK_ROW_HEIGHT * drawscale-2);
+                taskRectangle.Height = (int)(TASK_ROW_HEIGHT -2);
 
                 // Пропускаем рендер таски, если данный ресурс не в нужно время
+                /* Старая версия отсечения по X
                 if (!(
                     (taskRectangle.Location.X >= 0 && taskRectangle.Location.X < render_w) || 
                     (taskRectangle.Location.X + taskRectangle.Width >= 0)))
                 {
                     continue;
-                }
+                }*/
 
-                if (taskRectangle.Location.Y < 100 - 25)
+                // Не отрисовываем таску, если она уехала выше поля рендера тасков или ниже
+                if (taskRectangle.Location.Y < 100 - 25 || taskRectangle.Location.Y > this.Height)
                 {
                     continue;
                 }
@@ -460,18 +462,16 @@ namespace CSharpTestTask
             
             
 
-            // рисуем среднюю менюшку, чтобы она перекрывала чот
+            // рисуем среднюю менюшку на которой будет кнопка и счётчики задач
             e.Graphics.FillRectangle(lightGrayBrush, midBar);
             e.Graphics.DrawRectangle(borderPen, midBar);
             
-            //label1.Text = "View near " + current_hour_view + " hrs | x_scale = " + x_scale;
             // Рисуем линию прогресса дня
             int x = (int)(
                 (render_w * this.day_left_percentage * x_scale * timeBasedScale) -
-                //((render_w / tasksXBar.Maximum) * tasksXBar.Value) * x_scale * timeBasedScale - 
-                +tasksXBar.Value -
-                (displace_to_left * render_w) * x_scale * timeBasedScale);
-            //int x = (int)(this.Size.Width * this.day_left_percentage) - (render_w / x_scale) * tasksXBar.Value;
+                + tasksXBar.Value
+                - (displace_to_left * render_w) * x_scale * timeBasedScale);
+
             int X1 = x, Y1 = 0, X2 = x, Y2 = this.Size.Height;
             e.Graphics.DrawLine(blackPen, X1, Y1, X2, Y2);
         }
@@ -489,12 +489,12 @@ namespace CSharpTestTask
         private void Form1_MouseUp(object sender, MouseEventArgs e)
         {
         }
-/*
-        private void hScrollBar1_Scroll(object sender, ScrollEventArgs e)
-        {
-            this.drawscale = hScrollBar1.Value / 100.0;
-        }
-*/
+        /*
+                private void hScrollBar1_Scroll(object sender, ScrollEventArgs e)
+                {
+                    this.botBar = hScrollBar1.Value / 100.0;
+                }
+        */
         private void vScrollBar1_Scroll(object sender, ScrollEventArgs e)
         {
 
@@ -502,9 +502,7 @@ namespace CSharpTestTask
 
         private void tasksXBar_Scroll(object sender, ScrollEventArgs e)
         {
-            //x_task_dispose = tasksXBar.Value;
-
-            
+            recalculateRenderTimeFrame();
         }
 
         private void Form1_KeyPress(object sender, KeyPressEventArgs e)
@@ -548,10 +546,52 @@ namespace CSharpTestTask
                     tasksXBar.Value /= 2;
                 }
             }
-                
 
+            recalculateRenderTimeFrame();
             tasksXBar.Invalidate();
+            
             //Console.WriteLine(e.KeyChar.ToString() + " " + x_scale + " " + tasksXBar.Maximum);
+        }
+
+        /// <summary>
+        /// Пересчёт рамок рендера задач, для отсечения не нужных фигур с погрешностью + ~1 минута
+        /// </summary>
+        private void recalculateRenderTimeFrame()
+        {
+            
+            if (tasksXBar.Maximum != 0)
+            {
+                TimeSpan ts = cutOffEndDT - cutOffStartDT;
+
+                // сколько секунд отображается на экране
+                DateTime rend = cutOffStartDT.AddSeconds(ts.TotalSeconds * (1.0D / x_scale));
+
+                ts = rend - cutOffStartDT;
+
+                renderFrame.start = cutOffStartDT.AddSeconds(
+                        ts.TotalSeconds * ((double)tasksXBar.Value / (double)tasksXBar.Maximum) * x_scale - ts.TotalSeconds * ((double)tasksXBar.Value / (double)tasksXBar.Maximum)
+                    );
+
+                renderFrame.end = renderFrame.start.AddSeconds(
+                        ts.TotalSeconds
+                    );
+
+                /*
+                renderFrame.start = cutOffStartDT.AddSeconds(
+                    (cutOffEndDT - cutOffStartDT).TotalSeconds * ((double)tasksXBar.Value / (double)tasksXBar.Maximum) / x_scale);
+                
+                renderFrame.end = cutOffStartDT.AddSeconds(
+                    ((cutOffEndDT - cutOffStartDT).TotalSeconds * ((double)tasksXBar.Value / (double)tasksXBar.Maximum) / x_scale 
+                    +(cutOffEndDT - cutOffStartDT).TotalSeconds / (double)x_scale));
+                */
+            }
+            else
+            {
+                renderFrame.start = cutOffStartDT;
+                renderFrame.end = cutOffEndDT;
+            }
+
+            //Console.WriteLine("Start : " + renderFrame.start + " |  End : " + renderFrame.end);
         }
     }
 }

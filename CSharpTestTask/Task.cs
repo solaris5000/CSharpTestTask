@@ -51,9 +51,9 @@ namespace CSharpTestTask
 
         public Task()
         {
-            startTime = DateTime.Today.AddSeconds(random.Next(random.Next(0, 43000), 86000)); ;
+            startTime = DateTime.Today.AddSeconds(random.Next(random.Next(0, 43000), 80000)); ;
             //startTime = DateTime.Today.AddDays(random.Next(0, 5)).AddSeconds(random.Next(1700, 86000));
-            endTime = startTime.AddSeconds(random.Next(100, (int)(DateTime.Today.AddDays(1) - startTime).TotalSeconds) / 5);
+            endTime = startTime.AddSeconds(random.Next(100, (int)(DateTime.Today.AddDays(1) - startTime).TotalSeconds));
             enabled = random.Next(0, 2) == 1;
             id = idCounter++;
 
